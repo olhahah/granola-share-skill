@@ -36,7 +36,7 @@ Check these before doing anything else. If any are missing, stop and tell the us
 
 4. **`privacy-filter` skill is installed.**
    - Check that `~/.claude/skills/privacy-filter/SKILL.md` exists.
-   - If missing, stop and tell the user: "I need the privacy-filter skill to be installed before pushing. Install it: `git clone https://github.com/olhahah/privacy-filter-skill ~/skills/privacy-filter && ln -s ~/skills/privacy-filter/skill ~/.claude/skills/privacy-filter`. Then re-run me."
+   - If missing, stop and tell the user: "I need the privacy-filter skill to be installed before pushing. Install it: `mkdir -p ~/.claude/skills && git clone https://github.com/olhahah/privacy-filter-skill ~/.claude/skills/privacy-filter`. Then re-run me."
    - **Never push unfiltered transcripts.** If the filter isn't installed, the skill stops — no silent fallback.
 
 ## How it works — the gates

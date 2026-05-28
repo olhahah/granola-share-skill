@@ -16,25 +16,17 @@ Designed for teams sharing filtered meeting context into a central repo. You sta
 
 Three commands, run once.
 
-### 1. Clone the skill source repos
-
-```bash
-mkdir -p ~/skills
-git clone https://github.com/olhahah/privacy-filter-skill ~/skills/privacy-filter
-git clone https://github.com/olhahah/granola-share-skill ~/skills/granola-share
-```
-
-### 2. Symlink both into Claude Code's skill directory
+### 1. Install both skills
 
 ```bash
 mkdir -p ~/.claude/skills
-ln -s ~/skills/privacy-filter/skill ~/.claude/skills/privacy-filter
-ln -s ~/skills/granola-share/skill ~/.claude/skills/granola-share
+git clone https://github.com/olhahah/privacy-filter-skill ~/.claude/skills/privacy-filter
+git clone https://github.com/olhahah/granola-share-skill ~/.claude/skills/granola-share
 ```
 
-The symlinks mean `git pull` in either source dir picks up new versions — no re-install step.
+Two commands. The clones live directly where Claude Code expects skills — no symlinks, no extra source dirs at `$HOME`.
 
-### 3. Clone your granola repo
+### 2. Clone your granola repo
 
 ```bash
 git clone https://github.com/olhahah/granola-<yourname> ~/granola-<yourname>
@@ -76,9 +68,9 @@ You can say `stop` at any gate.
 Each skill updates independently. To pick up new versions:
 
 ```bash
-cd ~/skills/granola-share && git pull
+cd ~/.claude/skills/granola-share && git pull
 # or
-cd ~/skills/privacy-filter && git pull
+cd ~/.claude/skills/privacy-filter && git pull
 ```
 
 You don't have to update both at once.
