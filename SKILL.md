@@ -159,11 +159,19 @@ If `stop`, exit. If `yes`, proceed.
 
 ### Gate 9: Fetch and filter each meeting
 
+**First, a one-time safety check.** Make sure the repo's `.gitignore` lists `_logs/` and `.granola-share/` (create the file or append the lines if missing). This guarantees that even if some older tool writes a log into the repo, it can never be committed. The redaction log itself lives outside the repo (see step 2) — this is belt-and-braces.
+
 For each meeting in the final list, in order:
 
 1. **Fetch the full transcript** via `mcp__claude_ai_Granola__get_meeting_transcript`.
 
-2. **Apply the privacy filter.** Read the rules from `~/.claude/skills/privacy-filter/SKILL.md` and apply them to the transcript text. The privacy filter handles its own log writing — let it append to `_logs/privacy-redactions.md`.
+2. **Apply the privacy filter.** Read the rules from `~/.claude/skills/privacy-filter/SKILL.md` and apply them to the transcript text. **Write the redaction log to a local-only path *outside* this repo**, so the removed content never reaches GitHub:
+
+   ```
+   ~/.granola-share/<repo-name>/privacy-redactions.md
+   ```
+
+   `<repo-name>` is this repo's folder name — the basename of `git remote get-url origin`, minus any trailing `.git` (e.g. `granola-taylor`). Create the folder first with `mkdir -p`. This log holds the *full quotes* of everything stripped out — third-party medical info, mental-health detail, personal anecdotes. It must never be written inside the repo and never committed. The contributor reviews it on their own machine (Gate 10); it stays with them.
 
 3. **Build the file:**
    - **Filename:** `<YYYY-MM-DD>-<slug>.md`. Slug = the title lowercased, with non-alphanumeric characters collapsed to `-`, then trimmed of leading/trailing `-`, max 50 chars.
@@ -199,7 +207,7 @@ Print:
 
 > "All {N} transcripts are filtered and written locally. **{total redactions} redactions** total ({high-confidence count} high confidence, {low-confidence count} low confidence) across the {M} meetings that had any.
 >
-> Before I push, please open `_logs/privacy-redactions.md` and skim through. Anything important the filter cut that you want to keep? Tell me which to restore (e.g., 'restore redaction 3 in the 14 May meeting', 'keep the bit about the customer escalation', 'revert all low-confidence redactions in meeting 2'), or say `push` if it looks good."
+> Before I push, please open your local redaction log — `~/.granola-share/<repo-name>/privacy-redactions.md` (it's outside the repo and stays on your computer; it's never pushed) — and skim through. Anything important the filter cut that you want to keep? Tell me which to restore (e.g., 'restore redaction 3 in the 14 May meeting', 'keep the bit about the customer escalation', 'revert all low-confidence redactions in meeting 2'), or say `push` if it looks good."
 
 Wait for the user's response. Possible responses:
 
@@ -222,11 +230,12 @@ When the user says `push`:
    - If `git config user.name` and `git config user.email` are set, use them.
    - Otherwise, derive from `gh api user`: name = `.name // .login`, email = `<id>+<login>@users.noreply.github.com`.
 
-2. Stage and commit:
+2. Stage and commit — stage **only** the transcript files written this run, never a blanket `git add .`:
    ```bash
-   git add .
+   git add -- <file1>.md <file2>.md …   # the exact filenames written in Gate 9
    git -c user.name="<name>" -c user.email="<email>" commit -m "Add <N> transcript(s) — <range of dates>"
    ```
+   The redaction log lives outside the repo, so it can't be staged here anyway — but never use `git add .`, which could sweep in stray local files.
 
 3. Push:
    ```bash
@@ -260,6 +269,7 @@ To check what landed: `gh repo view {owner}/{repo} --web`
 5. **Idempotent on dedupe.** Re-running on the same set of meetings (matching `source_id`s already in the repo) is a no-op — Gate 4 dedupes them.
 6. **Don't auto-resolve auth issues.** If `gh` isn't authed or git push fails, tell the user — don't try to fix it silently.
 7. **Don't modify global git config.** Use `git -c user.name=... -c user.email=...` per commit.
+8. **Never write or commit the redaction log inside the repo.** It holds the full removed quotes and stays local on the contributor's machine (`~/.granola-share/<repo-name>/privacy-redactions.md`). Stage only the filtered transcript files — and the filtered files keep `[REDACTED]` markers, never the original text.
 
 ## Plain language for outputs
 
@@ -281,4 +291,4 @@ To check what landed: `gh repo view {owner}/{repo} --web`
 ## Related files
 
 - **The privacy filter skill** (read at runtime): `~/.claude/skills/privacy-filter/SKILL.md`
-- **The redactions log** (created/appended at runtime): `_logs/privacy-redactions.md` in the repo root
+- **The redactions log** (created/appended at runtime, local-only — never pushed): `~/.granola-share/<repo-name>/privacy-redactions.md`
