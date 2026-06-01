@@ -57,7 +57,7 @@ The skill walks you through it. Roughly:
 5. Asks if you want to drop any specific meetings — shows the final list.
 6. Asks for final confirmation before any fetching happens.
 7. Pulls each transcript, runs the privacy filter, writes one `.md` per meeting.
-8. Stops and asks you to open `_logs/privacy-redactions.md` to review what was cut. You can revert anything important before the push lands. Loop until you're happy.
+8. Stops and asks you to open your local redaction log (`~/.granola-share/<yourname>/privacy-redactions.md`, outside the repo) to review what was cut. You can revert anything important before the push lands. Loop until you're happy.
 9. Commits and pushes.
 10. Prints a summary and a link to the repo.
 
@@ -79,13 +79,14 @@ You don't have to update both at once.
 
 Each meeting becomes one `.md` file in your repo's root, named `<YYYY-MM-DD>-<slug>.md`. The file has a YAML frontmatter with provenance metadata (Granola source ID, source URL, title, date, participants, meeting type) plus the filtered body.
 
-The redaction log lives at `_logs/privacy-redactions.md`. It's also pushed — so Olha can review periodically what was cut.
+The redaction log stays on **your** computer — it's written to `~/.granola-share/<yourname>/privacy-redactions.md`, outside the repo, and is **never pushed**. It holds the full quotes of everything the filter removed, so it must not leave your machine. You review it yourself (step 8 above) before each push.
 
 ## What does NOT get pushed
 
 - Raw transcripts (those stay on your laptop only — filtered version is what reaches the repo)
 - Meetings you didn't approve at the confirmation gate
 - Redactions you chose to keep removed (the body has `[REDACTED]` where the personal content was)
+- The redaction log — it holds the full removed quotes and stays local on your computer (`~/.granola-share/<yourname>/privacy-redactions.md`)
 - Anything outside the time window you chose
 
 ## Troubleshooting
